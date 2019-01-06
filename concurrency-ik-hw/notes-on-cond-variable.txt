@@ -1,0 +1,38 @@
+source:
+http://www.modernescpp.com/index.php/c-core-guidelines-be-aware-of-the-traps-of-condition-variables
+
+Text taken from above:
+
+C++ Core Guidelines: Be Aware of the Traps of Condition Variables
+
+CP.42: Don’t wait without a condition
+
+Condition variables can be victims of two very serious issues: lost wakeup and spurious wakeup. The key concern about condition variables is that they have no memory.
+
+
+******************
+
+Lost Wakeup and Spurious Wakeup
+
+[*] Lost wakeup: The phenomenon of the lost wakeup is that the sender sends its notification before the receiver gets to its wait state. The consequence is that the notification is lost. The C++ standard describes condition variables as a simultaneous synchronisation mechanism: "The condition_variable class is a synchronisation primitive that can be used to block a thread, or multiple threads at the same time, ...". So the notification gets lost, and the receiver is waiting and waiting and ... .
+[*] Spurious wakeup: It may happen that the receiver wakes up, although no notification happened. At a minimum POSIX Threads and the Windows API can be victims of these phenomena.
+
+******************
+
+To become not the victim of this two issues, you have to use an additional predicate as memory; or as the rule state it an additional condition. If you don't believe it, here is the wait workflow.
+The wait workflow 
+
+In the initial processing of wait, the thread locks the mutex and then checks the predicate []{ return dataReady; }.
+
+    If the call of the predicated evaluates to
+        true: the thread continues its work.
+        false: condVar.wait() unlocks the mutex and puts the thread in a waiting (blocking) state
+
+If the condition_variable condVar is in the waiting state and gets a notification or a spurious wakeup the following steps happen.
+
+    The thread is unblocked and will reacquire the lock on the mutex. 
+    The thread checks the predicate.
+    If the call of the predicated evaluates to
+        true: the thread continues its work.
+        false: condVar.wait() unlocks the mutex and puts the thread in a waiting (blocking) state.
+
