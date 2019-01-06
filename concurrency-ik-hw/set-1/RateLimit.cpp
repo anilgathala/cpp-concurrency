@@ -49,6 +49,9 @@ void test_rate_limitter(int num_messages, int seconds, RateLimit& rate_limiter)
 {
     /// It is important to pass "std::ref(rate_limiter)" (not  simple rate_limiter), otherwise you'd get
     /// the mysterious "attempting to use deleted function"
+    /// --> this happens because, values are always passed by value to threads, even if the thread
+    ///     func signature has & for reference. We need to explicitly pass reference of the obj to
+    ///     do actual pass by reference, like what we're doing before
     std::thread foo(thread_func_make_calls, num_messages, seconds, std::ref(rate_limiter));
 
     if (foo.joinable()) {
