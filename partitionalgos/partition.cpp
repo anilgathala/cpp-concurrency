@@ -177,7 +177,7 @@ void partition_0s_and_1s_hoares(std::vector<int> & A)
 
     while (true) {
         while (i < A.size() && A[i] == 0) { i++; }
-        while (j < A.size() && A[j] == 1) { j--; }
+        while (j >= 0 && j < A.size() && A[j] == 1) { j--; }
         if (i >= j) {
             return;
         }
